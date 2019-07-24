@@ -62,7 +62,14 @@ const renderCard = item => (
 export default function App() {
   return (
     <View style={styles.container}>
-      <Deck data={DATA} renderCard={renderCard} />
+      <Deck
+        onSwipeRight={() => {
+          console.log("right");
+        }}
+        onSwipeLeft={() => {}}
+        data={DATA}
+        renderCard={renderCard}
+      />
     </View>
   );
 }
