@@ -6,9 +6,11 @@ const SWIPE_THRESHOLD = 0.5 * SCREEN_WIDTH;
 const SWIPE_OUT_DURATION = 450;
 
 const Deck = props => {
-  const [position] = React.useState(new Animated.ValueXY());
+  const [position, setPosition] = React.useState(new Animated.ValueXY());
   const [index, setIndex] = React.useState(0);
-
+  React.useEffect(() => {
+    setPosition(new Animated.ValueXY());
+  }, [index]);
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: {
@@ -22,6 +24,7 @@ const Deck = props => {
     const { onSwipeRight, onSwipeLeft, data } = props;
     const item = data[index];
     direction === "right" ? onSwipeRight(item) : onSwipeLeft(item);
+    setIndex(index + 1);
   };
 
   const forceSwipe = direction => {
@@ -31,7 +34,7 @@ const Deck = props => {
         y: 0
       },
       duration: SWIPE_OUT_DURATION
-    }).start(() => {});
+    }).start(() => onSwipeComplete(direction));
   };
 
   const panResponder = PanResponder.create({
@@ -72,8 +75,12 @@ const Deck = props => {
     };
   };
   const renderCards = () => {
-    return props.data.map((item, index) => {
-      if (index === 0) {
+    console.log("render");
+    return props.data.map((item, i) => {
+      if (i < index) {
+        return null;
+      }
+      if (i === index) {
         return (
           <Animated.View
             key={item.id}
