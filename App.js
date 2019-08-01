@@ -59,16 +59,25 @@ const renderCard = item => (
   </Card>
 );
 
+const renderNoMoreCards = () => (
+  <Card>
+    <Text>No More Cards</Text>
+  </Card>
+);
+
 export default function App() {
   return (
     <View style={styles.container}>
       <Deck
         onSwipeRight={() => {
-          console.log("right");
+          console.log("swipe right");
         }}
-        onSwipeLeft={() => {}}
+        onSwipeLeft={() => {
+          console.log("swipe left");
+        }}
         data={DATA}
         renderCard={renderCard}
+        renderNoMoreCards={renderNoMoreCards}
       />
     </View>
   );

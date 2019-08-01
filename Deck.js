@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Animated, PanResponder, Dimensions } from "react-native";
+import {
+  View,
+  Animated,
+  PanResponder,
+  Dimensions,
+  LayoutAnimation,
+  UIManager
+} from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = 0.5 * SCREEN_WIDTH;
@@ -9,8 +16,16 @@ const Deck = props => {
   const [position, setPosition] = React.useState(new Animated.ValueXY());
   const [index, setIndex] = React.useState(0);
   React.useEffect(() => {
+    // this line is for Android support
+    UIManager.setLayoutAnimationEnabledExperimental &&
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    LayoutAnimation.spring();
+  }, [position]);
+
+  React.useEffect(() => {
     setPosition(new Animated.ValueXY());
   }, [index]);
+
   const resetPosition = () => {
     Animated.spring(position, {
       toValue: {
@@ -40,7 +55,6 @@ const Deck = props => {
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (event, gesture) => {
-      // console.log(gesture);
       position.setValue({
         x: gesture.dx,
         y: gesture.dy
@@ -75,26 +89,49 @@ const Deck = props => {
     };
   };
   const renderCards = () => {
-    console.log("render");
-    return props.data.map((item, i) => {
-      if (i < index) {
-        return null;
-      }
-      if (i === index) {
+    if (index >= props.data.length) {
+      return props.renderNoMoreCards();
+    }
+    return props.data
+      .map((item, i) => {
+        if (i < index) {
+          return null;
+        }
+        if (i === index) {
+          return (
+            <Animated.View
+              key={item.id}
+              style={[getCardStyle(), styles.cardStyle]}
+              {...panResponder.panHandlers}
+            >
+              {props.renderCard(item)}
+            </Animated.View>
+          );
+        }
         return (
           <Animated.View
             key={item.id}
-            style={getCardStyle()}
-            {...panResponder.panHandlers}
+            style={[
+              styles.cardStyle,
+              {
+                top: 10 * (i - index)
+              }
+            ]}
           >
             {props.renderCard(item)}
           </Animated.View>
         );
-      }
-      return props.renderCard(item);
-    });
+      })
+      .reverse();
   };
   return <View>{renderCards()}</View>;
+};
+
+const styles = {
+  cardStyle: {
+    position: "absolute",
+    width: SCREEN_WIDTH
+  }
 };
 
 export default Deck;
